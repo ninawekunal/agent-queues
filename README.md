@@ -15,7 +15,10 @@ This repo is being built step-by-step.
    - `POST /api/upstash/qstash-receiver`
 5. Refund seed route:
    - `POST /api/refunds/seed`
-6. Startup/build guard:
+6. Refund queue + processing routes:
+   - `POST /api/refunds/queue`
+   - `POST /api/refunds/process`
+7. Startup/build guard:
    - Upstash Redis + QStash connectivity is validated at server start and before build.
 
 ## Run
@@ -99,6 +102,54 @@ This writes pending refund cards to Redis key:
 
 - `refunds:agent:<agentId>:pending`
 
+### Refund queue API (enqueue selected IDs)
+
+```bash
+curl -s -X POST http://localhost:3000/api/refunds/queue \
+  -H 'Content-Type: application/json' \
+  -d '{"agentId":"agent-1","refundIds":["rr_agent-1_1","rr_agent-1_2"]}' | jq
+```
+
+This pushes IDs into Redis list key:
+
+- `refunds:agent:<agentId>:queue`
+
+### Refund process API (simulate backend processing)
+
+```bash
+curl -s -X POST http://localhost:3000/api/refunds/process \
+  -H 'Content-Type: application/json' \
+  -d '{"agentId":"agent-1","refundId":"rr_agent-1_1"}' | jq
+```
+
+Behavior:
+
+- removes one queue item from Redis list
+- waits briefly (simulated backend work)
+- returns deterministic `SUCCESS` or `FAILED`
+- frontend then moves item from stream into success/failure bucket
+
+## Project Learnings (Redis + Streams)
+
+1. Use Redis Lists for queue semantics:
+   - Enqueue with `RPUSH`.
+   - Remove specific item with `LREM`.
+   - Inspect depth with `LLEN`.
+2. Keep API contracts strict:
+   - Use `zod` input/output schemas on every route.
+   - Return one shared envelope shape for all endpoints.
+3. Model stream lifecycle separately from queue storage:
+   - Queue = pending IDs waiting to process.
+   - Stream = live processing timeline (`PROCESSING -> SUCCESS/FAILED`).
+   - Buckets = terminal state storage shown in UI.
+4. Simulate backend behavior intentionally:
+   - Add controlled delay server-side to demonstrate async processing.
+   - Return mixed outcomes to show real failure handling.
+5. Keep frontend reactive and explicit:
+   - optimistic move to stream on click
+   - server response updates stream status
+   - delayed transfer into success/failure buckets improves observability
+
 ### Build/start verification
 
 - `npm run build` runs `scripts/verify-upstash.mjs` first and fails fast if Redis/QStash is not reachable.
@@ -117,3 +168,9 @@ This writes pending refund cards to Redis key:
 - `src/app/api/upstash/qstash-publish/route.ts`
 - `src/app/api/upstash/qstash-receiver/route.ts`
 - `src/app/api/refunds/seed/route.ts`
+- `src/app/api/refunds/queue/route.ts`
+- `src/app/api/refunds/process/route.ts`
+- `src/components/RefundWorkbench.tsx`
+- `src/components/QueueStreamPanel.tsx`
+- `src/components/SuccessBucket.tsx`
+- `src/components/FailureBucket.tsx`
