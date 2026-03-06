@@ -1,5 +1,8 @@
 import { Client as QStashClient } from "@upstash/qstash";
 import { Redis } from "@upstash/redis";
+import { loadEnvConfig } from "@next/env";
+
+loadEnvConfig(process.cwd());
 
 function readEnv() {
   return {

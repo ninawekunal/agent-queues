@@ -1,4 +1,5 @@
 import type { RefundRequest } from "@/shared/contracts/refunds";
+import { Card, CardContent, Chip, Grid, Stack, Typography } from "@mui/material";
 
 interface InvoiceCardProps {
   invoice: RefundRequest;
@@ -12,37 +13,56 @@ function formatAmount(amount: number, currency: string): string {
 }
 
 export function InvoiceCard({ invoice }: InvoiceCardProps) {
-  return (
-    <article className="invoice-card">
-      <header className="invoice-card__header">
-        <h2>{invoice.hotelName}</h2>
-        <span className={`invoice-card__status invoice-card__status--${invoice.status.toLowerCase()}`}>
-          {invoice.status}
-        </span>
-      </header>
+  const chipColor =
+    invoice.status === "SUCCESS"
+      ? "success"
+      : invoice.status === "FAILED"
+        ? "error"
+        : invoice.status === "PROCESSING"
+          ? "info"
+          : "warning";
 
-      <section className="invoice-card__details">
-        <div className="invoice-card__row">
-          <p className="invoice-card__label">Refund ID</p>
-          <p className="invoice-card__value">{invoice.id}</p>
-        </div>
-        <div className="invoice-card__row">
-          <p className="invoice-card__label">Booking Ref</p>
-          <p className="invoice-card__value">{invoice.bookingReference}</p>
-        </div>
-        <div className="invoice-card__row">
-          <p className="invoice-card__label">Agent</p>
-          <p className="invoice-card__value">{invoice.agentId}</p>
-        </div>
-        <div className="invoice-card__row">
-          <p className="invoice-card__label">Amount</p>
-          <p className="invoice-card__value">{formatAmount(invoice.amount, invoice.currency)}</p>
-        </div>
-        <div className="invoice-card__row invoice-card__reason">
-          <p className="invoice-card__label">Reason</p>
-          <p className="invoice-card__value">{invoice.reason}</p>
-        </div>
-      </section>
-    </article>
+  return (
+    <Card variant="outlined" sx={{ borderRadius: 2 }}>
+      <CardContent>
+        <Stack direction="row" justifyContent="space-between" alignItems="center" spacing={2}>
+          <Typography variant="h6">{invoice.hotelName}</Typography>
+          <Chip label={invoice.status} color={chipColor} size="small" />
+        </Stack>
+
+        <Grid container spacing={1.2} sx={{ mt: 0.8 }}>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Typography variant="caption" color="text.secondary">
+              Refund ID
+            </Typography>
+            <Typography variant="body2">{invoice.id}</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Typography variant="caption" color="text.secondary">
+              Booking Ref
+            </Typography>
+            <Typography variant="body2">{invoice.bookingReference}</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Typography variant="caption" color="text.secondary">
+              Agent
+            </Typography>
+            <Typography variant="body2">{invoice.agentId}</Typography>
+          </Grid>
+          <Grid size={{ xs: 12, sm: 6 }}>
+            <Typography variant="caption" color="text.secondary">
+              Amount
+            </Typography>
+            <Typography variant="body2">{formatAmount(invoice.amount, invoice.currency)}</Typography>
+          </Grid>
+          <Grid size={12}>
+            <Typography variant="caption" color="text.secondary">
+              Reason
+            </Typography>
+            <Typography variant="body2">{invoice.reason}</Typography>
+          </Grid>
+        </Grid>
+      </CardContent>
+    </Card>
   );
 }
