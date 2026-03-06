@@ -66,10 +66,12 @@ export function HeadingBanner({ title, description }: HeadingBannerProps) {
   }, []);
 
   return (
-    <Paper variant="outlined" sx={{ borderRadius: 2, p: 1.5 }}>
+    <Paper variant="outlined" sx={{ borderRadius: 2, p: { xs: 1.1, sm: 1.5 } }}>
       <Stack spacing={1}>
         <div>
-          <Typography variant="h5">{title}</Typography>
+          <Typography variant="h5" sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}>
+            {title}
+          </Typography>
           <Typography variant="body2" color="text.secondary">
             {description}
           </Typography>

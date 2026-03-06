@@ -1,4 +1,7 @@
+"use client";
+
 import {
+  Box,
   Chip,
   Paper,
   Stack,
@@ -7,6 +10,8 @@ import {
   Stepper,
   Tooltip,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 export interface StreamEvent {
@@ -32,6 +37,9 @@ export function QueueStreamPanel({
   streamEvents,
   onProcessQueueItem,
 }: QueueStreamPanelProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const streamColor = (status: StreamEvent["status"]): "default" | "info" | "success" | "error" => {
     if (status === "SUCCESS") {
       return "success";
@@ -57,29 +65,50 @@ export function QueueStreamPanel({
           <Typography variant="body2" color="text.secondary">
             Queue is empty.
           </Typography>
-        ) : (
-          <Stepper alternativeLabel nonLinear activeStep={-1}>
+        ) : isMobile ? (
+          <Stack direction="row" spacing={0.6} useFlexGap flexWrap="wrap">
             {queueIds.map((refundId) => (
-              <Step key={refundId} completed={false}>
-                <Tooltip title={`refund_id: ${refundId}`}>
-                  <StepButton
-                    color="inherit"
-                    onClick={() => onProcessQueueItem(refundId)}
-                    sx={{
-                      borderRadius: 1.25,
-                      transition: "all 150ms ease",
-                      "&:hover": {
-                        backgroundColor: "rgba(25, 118, 210, 0.12)",
-                        color: "primary.main",
-                      },
-                    }}
-                  >
-                    {getRequestNumber(refundId)}
-                  </StepButton>
-                </Tooltip>
-              </Step>
+              <Tooltip key={refundId} title={`refund_id: ${refundId}`}>
+                <Chip
+                  label={getRequestNumber(refundId)}
+                  clickable
+                  color="info"
+                  onClick={() => onProcessQueueItem(refundId)}
+                  sx={{
+                    transition: "all 150ms ease",
+                    "&:hover": {
+                      backgroundColor: "rgba(25, 118, 210, 0.2)",
+                    },
+                  }}
+                />
+              </Tooltip>
             ))}
-          </Stepper>
+          </Stack>
+        ) : (
+          <Box sx={{ overflowX: "auto", pb: 0.5 }}>
+            <Stepper alternativeLabel nonLinear activeStep={-1} sx={{ minWidth: 520 }}>
+              {queueIds.map((refundId) => (
+                <Step key={refundId} completed={false}>
+                  <Tooltip title={`refund_id: ${refundId}`}>
+                    <StepButton
+                      color="inherit"
+                      onClick={() => onProcessQueueItem(refundId)}
+                      sx={{
+                        borderRadius: 1.25,
+                        transition: "all 150ms ease",
+                        "&:hover": {
+                          backgroundColor: "rgba(25, 118, 210, 0.12)",
+                          color: "primary.main",
+                        },
+                      }}
+                    >
+                      {getRequestNumber(refundId)}
+                    </StepButton>
+                  </Tooltip>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
         )}
       </Paper>
 

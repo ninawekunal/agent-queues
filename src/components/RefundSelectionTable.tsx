@@ -14,6 +14,8 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import type { RefundRequest } from "@/shared/contracts/refunds";
 
@@ -35,6 +37,8 @@ export function RefundSelectionTable({
   processing = false,
   onProcessSelected,
 }: RefundSelectionTableProps) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const allIds = useMemo(() => refunds.map((refund) => refund.id), [refunds]);
@@ -86,7 +90,12 @@ export function RefundSelectionTable({
 
   return (
     <Stack spacing={1}>
-      <Stack direction="row" alignItems="center" justifyContent="space-between">
+      <Stack
+        direction={isMobile ? "column" : "row"}
+        alignItems={isMobile ? "stretch" : "center"}
+        justifyContent="space-between"
+        spacing={1}
+      >
         <Typography variant="subtitle2">
           {selectedCount} selected / {refunds.length} total
         </Typography>
@@ -95,12 +104,13 @@ export function RefundSelectionTable({
           size="small"
           disabled={selectedCount === 0 || processing}
           onClick={handleProcessSelected}
+          sx={isMobile ? { width: "100%" } : undefined}
         >
           Process Selected
         </Button>
       </Stack>
 
-      <TableContainer component={Paper} variant="outlined">
+      <TableContainer component={Paper} variant="outlined" sx={{ overflowX: "auto" }}>
         <Table size="small" aria-label="Refund request selection table">
           <TableHead>
             <TableRow>
@@ -113,24 +123,24 @@ export function RefundSelectionTable({
                 />
               </TableCell>
               <TableCell>Request</TableCell>
-              <TableCell>Amount</TableCell>
-              <TableCell>Status</TableCell>
-              <TableCell>Reason</TableCell>
+              <TableCell sx={{ whiteSpace: "nowrap" }}>Amount</TableCell>
+              {!isMobile ? <TableCell>Status</TableCell> : null}
+              {!isMobile ? <TableCell>Reason</TableCell> : null}
             </TableRow>
           </TableHead>
           <TableBody>
             {refunds.map((refund) => {
               const isSelected = selectedIds.has(refund.id);
               return (
-                <TableRow key={refund.id} hover selected={isSelected}>
-                  <TableCell padding="checkbox">
+                <TableRow key={refund.id} hover selected={isSelected} sx={isMobile ? { height: 58 } : undefined}>
+                  <TableCell padding="checkbox" sx={isMobile ? { py: 0.5, px: 1 } : undefined}>
                     <Checkbox
                       checked={isSelected}
                       onChange={() => toggleOne(refund.id)}
                       inputProps={{ "aria-label": `select ${refund.id}` }}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={isMobile ? { py: 0.5, px: 1 } : undefined}>
                     <Typography variant="body2" fontWeight={600} noWrap>
                       {refund.hotelName}
                     </Typography>
@@ -138,17 +148,21 @@ export function RefundSelectionTable({
                       {refund.id} | {refund.bookingReference}
                     </Typography>
                   </TableCell>
-                  <TableCell>
+                  <TableCell sx={isMobile ? { py: 0.5, px: 1 } : undefined}>
                     <Typography variant="body2">{formatAmount(refund.amount, refund.currency)}</Typography>
                   </TableCell>
-                  <TableCell>
-                    <Chip label={refund.status} size="small" color="warning" />
-                  </TableCell>
-                  <TableCell>
-                    <Typography variant="body2" noWrap>
-                      {refund.reason}
-                    </Typography>
-                  </TableCell>
+                  {!isMobile ? (
+                    <TableCell>
+                      <Chip label={refund.status} size="small" color="warning" />
+                    </TableCell>
+                  ) : null}
+                  {!isMobile ? (
+                    <TableCell>
+                      <Typography variant="body2" noWrap>
+                        {refund.reason}
+                      </Typography>
+                    </TableCell>
+                  ) : null}
                 </TableRow>
               );
             })}
