@@ -66,26 +66,65 @@ export function HeadingBanner({ title, description }: HeadingBannerProps) {
   }, []);
 
   return (
-    <Paper variant="outlined" sx={{ borderRadius: 2, p: { xs: 1.1, sm: 1.5 } }}>
-      <Stack spacing={1}>
+    <Paper
+      variant="outlined"
+      sx={{
+        borderRadius: 2.2,
+        p: { xs: 1.15, sm: 1.6 },
+        borderColor: "rgba(25, 118, 210, 0.25)",
+        background:
+          "linear-gradient(135deg, rgba(25,118,210,0.09) 0%, rgba(255,255,255,0.96) 35%, rgba(255,255,255,1) 100%)",
+      }}
+    >
+      <Stack spacing={1.1}>
         <div>
-          <Typography variant="h5" sx={{ fontSize: { xs: "1.2rem", sm: "1.5rem" } }}>
+          <Typography
+            variant="overline"
+            sx={{
+              color: "primary.main",
+              letterSpacing: "0.09em",
+              fontWeight: 700,
+              lineHeight: 1,
+            }}
+          >
+            REFUND OPERATIONS
+          </Typography>
+          <Typography
+            variant="h5"
+            sx={{
+              mt: 0.45,
+              fontSize: "clamp(1.12rem, 2.3vw, 1.62rem)",
+              lineHeight: 1.18,
+              fontWeight: 700,
+            }}
+          >
             {title}
           </Typography>
-          <Typography variant="body2" color="text.secondary">
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{
+              mt: 0.55,
+              fontSize: "clamp(0.86rem, 1.55vw, 0.98rem)",
+              lineHeight: 1.45,
+              maxWidth: 880,
+            }}
+          >
             {description}
           </Typography>
         </div>
-        <Stack direction="row" spacing={1} flexWrap="wrap">
+        <Stack direction="row" spacing={0.85} useFlexGap flexWrap="wrap">
           <Chip
             size="small"
             color={chipColorForState(redisState)}
             label={chipLabelForState("Redis", redisState)}
+            sx={{ fontWeight: 600 }}
           />
           <Chip
             size="small"
             color={chipColorForState(qstashState)}
             label={chipLabelForState("QStash", qstashState)}
+            sx={{ fontWeight: 600 }}
           />
         </Stack>
       </Stack>

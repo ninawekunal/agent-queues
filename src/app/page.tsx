@@ -45,7 +45,7 @@ export default function Home() {
       <section className="home-card">
         <HeadingBanner
           title="Refund Queue Workbench"
-          description="Bulk-select refunds to enqueue via API. Queue items auto-process after 1 second, blink while processing starts, move through stream statuses, then settle into success or failure buckets."
+          description="Select hotel refunds in bulk, enqueue them instantly, and watch each request move from queue to live processing stream before landing in success or failure buckets."
         />
         <div className="invoice-card-wrap">
           <RefundWorkbench agentId="agent-1" initialRefunds={dummyRefunds} />
