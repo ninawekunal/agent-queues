@@ -53,3 +53,135 @@ h1 {
 p {
   margin: 0;
 }
+
+.invoice-card-wrap {
+  margin-top: 1rem;
+}
+
+.invoice-card {
+  border: 1px solid rgba(16, 34, 46, 0.18);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 1rem;
+}
+
+.invoice-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.invoice-card__header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.invoice-card__status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 0.25rem 0.45rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+
+.invoice-card__status--pending {
+  background: #fff5d7;
+  border-color: #efcd72;
+}
+
+.invoice-card__status--processing {
+  background: #dff4ff;
+  border-color: #7dc7eb;
+}
+
+.invoice-card__status--success {
+  background: #e4f8eb;
+  border-color: #80d7a0;
+}
+
+.invoice-card__status--failed {
+  background: #ffe7e7;
+  border-color: #e5a6a6;
+}
+
+.invoice-card__details {
+  margin: 0.9rem 0 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.65rem;
+}
+
+.invoice-card__row {
+  margin: 0;
+}
+
+.invoice-card__label {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.invoice-card__value {
+  margin: 0.2rem 0 0;
+  font-size: 0.95rem;
+}
+
+.invoice-card__reason {
+  grid-column: 1 / -1;
+}
+
+.status-card {
+  border: 1px solid rgba(16, 34, 46, 0.18);
+  border-radius: 12px;
+  background: #ffffff;
+  padding: 0.9rem;
+}
+
+.status-card__title {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.status-card__meta {
+  margin-top: 0.45rem;
+  display: grid;
+  gap: 0.45rem;
+}
+
+.status-card__state {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  padding: 0.2rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.status-card__state--ok {
+  background: #e4f8eb;
+  border: 1px solid #80d7a0;
+}
+
+.status-card__state--error {
+  background: #ffe7e7;
+  border: 1px solid #e5a6a6;
+}
+
+.status-card__label {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-card__value {
+  margin: 0.2rem 0 0;
+  font-size: 0.9rem;
+}
