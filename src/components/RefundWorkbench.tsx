@@ -29,6 +29,8 @@ export function RefundWorkbench({ agentId, initialRefunds }: RefundWorkbenchProp
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const scheduledTimersRef = useRef<Map<string, number>>(new Map());
   const processingIdsRef = useRef<Set<string>>(new Set());
+  const queueSectionRef = useRef<HTMLDivElement | null>(null);
+  const previousQueueLengthRef = useRef<number>(0);
 
   const delay = (ms: number) =>
     new Promise<void>((resolve) => {
@@ -160,6 +162,23 @@ export function RefundWorkbench({ agentId, initialRefunds }: RefundWorkbenchProp
   };
 
   useEffect(() => {
+    const previousLength = previousQueueLengthRef.current;
+    const nextLength = queueIds.length;
+    previousQueueLengthRef.current = nextLength;
+
+    if (nextLength <= previousLength) {
+      return;
+    }
+
+    if (!window.matchMedia("(max-width: 600px)").matches) {
+      return;
+    }
+
+    queueSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    queueSectionRef.current?.focus({ preventScroll: true });
+  }, [queueIds]);
+
+  useEffect(() => {
     for (const refundId of queueIds) {
       if (scheduledTimersRef.current.has(refundId) || processingIdsRef.current.has(refundId)) {
         continue;
@@ -196,12 +215,14 @@ export function RefundWorkbench({ agentId, initialRefunds }: RefundWorkbenchProp
     <Stack spacing={2}>
       {errorMessage ? <Alert severity="error">{errorMessage}</Alert> : null}
 
-      <QueueStreamPanel
-        queueIds={queueIds}
-        streamEvents={streamEvents}
-        onProcessQueueItem={handleProcessQueueItem}
-        blinkingQueueIds={blinkingQueueIds}
-      />
+      <div ref={queueSectionRef} tabIndex={-1}>
+        <QueueStreamPanel
+          queueIds={queueIds}
+          streamEvents={streamEvents}
+          onProcessQueueItem={handleProcessQueueItem}
+          blinkingQueueIds={blinkingQueueIds}
+        />
+      </div>
       <section className="bucket-grid" aria-label="Success and failure buckets">
         <SuccessBucket items={successItems} />
         <FailureBucket items={failureItems} />
