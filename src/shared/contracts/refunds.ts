@@ -28,6 +28,22 @@ export const refundSeedOutputSchema = z.object({
   items: z.array(refundRequestSchema),
 });
 
+export const refundQueueEnqueueInputSchema = z
+  .object({
+    agentId: z.string().min(1),
+    refundIds: z.array(z.string().min(1)).min(1),
+  })
+  .strict();
+
+export const refundQueueEnqueueOutputSchema = z.object({
+  queued: z.literal(true),
+  queueKey: z.string().min(1),
+  queuedIds: z.array(z.string().min(1)),
+  queueDepth: z.number().int().nonnegative(),
+});
+
 export type RefundRequest = z.infer<typeof refundRequestSchema>;
 export type RefundSeedInput = z.infer<typeof refundSeedInputSchema>;
 export type RefundSeedOutput = z.infer<typeof refundSeedOutputSchema>;
+export type RefundQueueEnqueueInput = z.infer<typeof refundQueueEnqueueInputSchema>;
+export type RefundQueueEnqueueOutput = z.infer<typeof refundQueueEnqueueOutputSchema>;

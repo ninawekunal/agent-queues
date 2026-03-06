@@ -1,6 +1,5 @@
 import { HeadingBanner } from "@/components/HeadingBanner";
-import { RefundSelectionTable } from "@/components/RefundSelectionTable";
-import { SystemStatusPanel } from "@/components/SystemStatusPanel";
+import { RefundWorkbench } from "@/components/RefundWorkbench";
 import type { RefundRequest } from "@/shared/contracts/refunds";
 
 const HOTEL_NAMES = [
@@ -46,13 +45,10 @@ export default function Home() {
       <section className="home-card">
         <HeadingBanner
           title="Refund Queue Workbench"
-          description="Support agents can select hotel refund requests in bulk, submit them for backend queue processing, and monitor Redis/QStash connectivity in real time."
+          description="Bulk-select refund requests, enqueue them via API, and click queued request numbers to process them into the stream."
         />
         <div className="invoice-card-wrap">
-          <RefundSelectionTable refunds={dummyRefunds} />
-        </div>
-        <div className="status-wrap">
-          <SystemStatusPanel />
+          <RefundWorkbench agentId="agent-1" initialRefunds={dummyRefunds} />
         </div>
       </section>
     </main>

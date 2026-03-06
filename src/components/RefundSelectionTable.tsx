@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   Button,
   Checkbox,
@@ -19,6 +19,8 @@ import type { RefundRequest } from "@/shared/contracts/refunds";
 
 interface RefundSelectionTableProps {
   refunds: RefundRequest[];
+  processing?: boolean;
+  onProcessSelected: (selectedIds: string[]) => void;
 }
 
 function formatAmount(amount: number, currency: string): string {
@@ -28,7 +30,11 @@ function formatAmount(amount: number, currency: string): string {
   }).format(amount);
 }
 
-export function RefundSelectionTable({ refunds }: RefundSelectionTableProps) {
+export function RefundSelectionTable({
+  refunds,
+  processing = false,
+  onProcessSelected,
+}: RefundSelectionTableProps) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   const allIds = useMemo(() => refunds.map((refund) => refund.id), [refunds]);
@@ -57,13 +63,39 @@ export function RefundSelectionTable({ refunds }: RefundSelectionTableProps) {
     });
   };
 
+  useEffect(() => {
+    setSelectedIds((prev) => {
+      const next = new Set<string>();
+      for (const id of prev) {
+        if (allIds.includes(id)) {
+          next.add(id);
+        }
+      }
+      return next;
+    });
+  }, [allIds]);
+
+  const handleProcessSelected = () => {
+    if (selectedIds.size === 0) {
+      return;
+    }
+
+    onProcessSelected(Array.from(selectedIds));
+    setSelectedIds(new Set());
+  };
+
   return (
     <Stack spacing={1}>
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Typography variant="subtitle2">
           {selectedCount} selected / {refunds.length} total
         </Typography>
-        <Button variant="contained" size="small" disabled={selectedCount === 0}>
+        <Button
+          variant="contained"
+          size="small"
+          disabled={selectedCount === 0 || processing}
+          onClick={handleProcessSelected}
+        >
           Process Selected
         </Button>
       </Stack>

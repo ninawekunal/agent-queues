@@ -58,18 +58,14 @@ p {
   margin-top: 1rem;
 }
 
-.status-wrap {
-  margin-top: 1rem;
-}
-
-.status-grid {
+.queue-stream-grid {
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 0.75rem;
 }
 
 @media (min-width: 860px) {
-  .status-grid {
+  .queue-stream-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
