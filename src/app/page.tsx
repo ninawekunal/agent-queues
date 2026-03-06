@@ -1,3 +1,4 @@
+import { HeadingBanner } from "@/components/HeadingBanner";
 import { RefundSelectionTable } from "@/components/RefundSelectionTable";
 import { SystemStatusPanel } from "@/components/SystemStatusPanel";
 import type { RefundRequest } from "@/shared/contracts/refunds";
@@ -43,9 +44,10 @@ export default function Home() {
   return (
     <main className="home-shell">
       <section className="home-card">
-        <p className="eyebrow">Step 1</p>
-        <h1>Refund Selection Table</h1>
-        <p>Compact MUI table with checkbox selection for 10 dummy hotel refund requests.</p>
+        <HeadingBanner
+          title="Refund Queue Workbench"
+          description="Support agents can select hotel refund requests in bulk, submit them for backend queue processing, and monitor Redis/QStash connectivity in real time."
+        />
         <div className="invoice-card-wrap">
           <RefundSelectionTable refunds={dummyRefunds} />
         </div>
