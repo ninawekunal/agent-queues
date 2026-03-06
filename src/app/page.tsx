@@ -1,4 +1,5 @@
 import { InvoiceCard } from "@/components/InvoiceCard";
+import { SystemStatusPanel } from "@/components/SystemStatusPanel";
 import type { RefundRequest } from "@/shared/contracts/refunds";
 
 export default function Home() {
@@ -24,6 +25,9 @@ export default function Home() {
         </p>
         <div className="invoice-card-wrap">
           <InvoiceCard invoice={sampleInvoice} />
+        </div>
+        <div className="status-wrap">
+          <SystemStatusPanel />
         </div>
       </section>
     </main>
