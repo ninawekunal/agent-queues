@@ -1,26 +1,13 @@
-import { cookies } from "next/headers";
-import { redirect } from "next/navigation";
-import { RefundQueueView } from "@/client/views/RefundQueueView";
-import {
-  SESSION_COOKIE_NAME,
-  getAgentProfile,
-} from "@/shared/constants/agents";
-
-export const dynamic = "force-dynamic";
-
-export default async function Home() {
-  const cookieStore = await cookies();
-  const sessionAgentId = cookieStore.get(SESSION_COOKIE_NAME)?.value;
-  const agentProfile = getAgentProfile(sessionAgentId);
-
-  if (!agentProfile) {
-    redirect("/login");
-  }
-
+export default function Home() {
   return (
-    <RefundQueueView
-      agentId={agentProfile.id}
-      agentDisplayName={agentProfile.displayName}
-    />
+    <main className="home-shell">
+      <section className="home-card">
+        <p className="eyebrow">Step 1</p>
+        <h1>Next.js + Node.js Server Setup Complete</h1>
+        <p>
+          This project now runs Next.js using a custom Node server entry point.
+        </p>
+      </section>
+    </main>
   );
 }
