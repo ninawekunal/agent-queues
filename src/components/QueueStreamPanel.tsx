@@ -5,13 +5,14 @@ import {
   Step,
   StepButton,
   Stepper,
+  Tooltip,
   Typography,
 } from "@mui/material";
 
 export interface StreamEvent {
   refundId: string;
   agentId: string;
-  status: "PROCESSED";
+  status: "PROCESSING" | "SUCCESS" | "FAILED";
   processedAt: string;
 }
 
@@ -31,6 +32,19 @@ export function QueueStreamPanel({
   streamEvents,
   onProcessQueueItem,
 }: QueueStreamPanelProps) {
+  const streamColor = (status: StreamEvent["status"]): "default" | "info" | "success" | "error" => {
+    if (status === "SUCCESS") {
+      return "success";
+    }
+    if (status === "FAILED") {
+      return "error";
+    }
+    if (status === "PROCESSING") {
+      return "info";
+    }
+    return "default";
+  };
+
   return (
     <section className="queue-stream-grid" aria-label="Queue and stream data">
       <Paper variant="outlined" sx={{ p: 1.25, borderRadius: 2 }}>
@@ -47,9 +61,22 @@ export function QueueStreamPanel({
           <Stepper alternativeLabel nonLinear activeStep={-1}>
             {queueIds.map((refundId) => (
               <Step key={refundId} completed={false}>
-                <StepButton color="inherit" onClick={() => onProcessQueueItem(refundId)}>
-                  {getRequestNumber(refundId)}
-                </StepButton>
+                <Tooltip title={`refund_id: ${refundId}`}>
+                  <StepButton
+                    color="inherit"
+                    onClick={() => onProcessQueueItem(refundId)}
+                    sx={{
+                      borderRadius: 1.25,
+                      transition: "all 150ms ease",
+                      "&:hover": {
+                        backgroundColor: "rgba(25, 118, 210, 0.12)",
+                        color: "primary.main",
+                      },
+                    }}
+                  >
+                    {getRequestNumber(refundId)}
+                  </StepButton>
+                </Tooltip>
               </Step>
             ))}
           </Stepper>
@@ -68,11 +95,24 @@ export function QueueStreamPanel({
               No processed stream events yet.
             </Typography>
           ) : (
-            streamEvents.map((event) => (
-              <Typography key={`${event.refundId}-${event.processedAt}`} variant="body2">
-                {getRequestNumber(event.refundId)} | {event.status} | {event.processedAt}
-              </Typography>
-            ))
+            <Stack direction="row" spacing={0.6} useFlexGap flexWrap="wrap">
+              {streamEvents.map((event) => (
+                <Tooltip key={`${event.refundId}-${event.processedAt}`} title={`refund_id: ${event.refundId}`}>
+                  <Chip
+                    size="small"
+                    color={streamColor(event.status)}
+                    label={`${getRequestNumber(event.refundId)} • ${event.status}`}
+                    sx={{
+                      transition: "all 150ms ease",
+                      "&:hover": {
+                        transform: "translateY(-1px)",
+                        boxShadow: 1,
+                      },
+                    }}
+                  />
+                </Tooltip>
+              ))}
+            </Stack>
           )}
         </Stack>
       </Paper>
