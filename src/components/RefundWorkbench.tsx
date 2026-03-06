@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Alert, Stack } from "@mui/material";
 import { QueueStreamPanel, type StreamEvent } from "@/components/QueueStreamPanel";
 import { RefundSelectionTable } from "@/components/RefundSelectionTable";
@@ -21,11 +21,19 @@ interface RefundWorkbenchProps {
 export function RefundWorkbench({ agentId, initialRefunds }: RefundWorkbenchProps) {
   const [tableRefunds, setTableRefunds] = useState<RefundRequest[]>(initialRefunds);
   const [queueIds, setQueueIds] = useState<string[]>([]);
+  const [blinkingQueueIds, setBlinkingQueueIds] = useState<string[]>([]);
   const [streamEvents, setStreamEvents] = useState<StreamEvent[]>([]);
   const [successItems, setSuccessItems] = useState<BucketItem[]>([]);
   const [failureItems, setFailureItems] = useState<BucketItem[]>([]);
   const [isProcessingSelection, setIsProcessingSelection] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const scheduledTimersRef = useRef<Map<string, number>>(new Map());
+  const processingIdsRef = useRef<Set<string>>(new Set());
+
+  const delay = (ms: number) =>
+    new Promise<void>((resolve) => {
+      window.setTimeout(resolve, ms);
+    });
 
   const handleProcessSelected = async (selectedIds: string[]) => {
     if (selectedIds.length === 0) {
@@ -66,6 +74,20 @@ export function RefundWorkbench({ agentId, initialRefunds }: RefundWorkbenchProp
   };
 
   const handleProcessQueueItem = async (refundId: string) => {
+    if (processingIdsRef.current.has(refundId)) {
+      return;
+    }
+
+    processingIdsRef.current.add(refundId);
+    const timerId = scheduledTimersRef.current.get(refundId);
+    if (timerId) {
+      window.clearTimeout(timerId);
+      scheduledTimersRef.current.delete(refundId);
+    }
+
+    setBlinkingQueueIds((prev) => [...prev, refundId]);
+    await delay(600);
+    setBlinkingQueueIds((prev) => prev.filter((id) => id !== refundId));
     setQueueIds((prev) => prev.filter((id) => id !== refundId));
     setStreamEvents((prev) => [
       {
@@ -98,6 +120,7 @@ export function RefundWorkbench({ agentId, initialRefunds }: RefundWorkbenchProp
             event.refundId === refundId ? { ...event, status: "FAILED" } : event,
           ),
         );
+        processingIdsRef.current.delete(refundId);
         return;
       }
 
@@ -121,6 +144,7 @@ export function RefundWorkbench({ agentId, initialRefunds }: RefundWorkbenchProp
         } else {
           setFailureItems((prev) => [{ refundId, processedAt }, ...prev]);
         }
+        processingIdsRef.current.delete(refundId);
       }, 2200);
     } catch (error) {
       setErrorMessage(
@@ -131,8 +155,42 @@ export function RefundWorkbench({ agentId, initialRefunds }: RefundWorkbenchProp
           event.refundId === refundId ? { ...event, status: "FAILED" } : event,
         ),
       );
+      processingIdsRef.current.delete(refundId);
     }
   };
+
+  useEffect(() => {
+    for (const refundId of queueIds) {
+      if (scheduledTimersRef.current.has(refundId) || processingIdsRef.current.has(refundId)) {
+        continue;
+      }
+
+      const timeoutId = window.setTimeout(() => {
+        scheduledTimersRef.current.delete(refundId);
+        void handleProcessQueueItem(refundId);
+      }, 1000);
+
+      scheduledTimersRef.current.set(refundId, timeoutId);
+    }
+
+    return () => {
+      for (const [refundId, timeoutId] of scheduledTimersRef.current) {
+        if (!queueIds.includes(refundId)) {
+          window.clearTimeout(timeoutId);
+          scheduledTimersRef.current.delete(refundId);
+        }
+      }
+    };
+  }, [queueIds]);
+
+  useEffect(() => {
+    return () => {
+      for (const timeoutId of scheduledTimersRef.current.values()) {
+        window.clearTimeout(timeoutId);
+      }
+      scheduledTimersRef.current.clear();
+    };
+  }, []);
 
   return (
     <Stack spacing={2}>
@@ -142,6 +200,7 @@ export function RefundWorkbench({ agentId, initialRefunds }: RefundWorkbenchProp
         queueIds={queueIds}
         streamEvents={streamEvents}
         onProcessQueueItem={handleProcessQueueItem}
+        blinkingQueueIds={blinkingQueueIds}
       />
       <section className="bucket-grid" aria-label="Success and failure buckets">
         <SuccessBucket items={successItems} />

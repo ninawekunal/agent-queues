@@ -5,6 +5,18 @@
   --muted: #4a606d;
 }
 
+@keyframes queueBlink {
+  0%,
+  100% {
+    filter: brightness(1);
+    transform: scale(1);
+  }
+  50% {
+    filter: brightness(1.22);
+    transform: scale(1.04);
+  }
+}
+
 * {
   box-sizing: border-box;
 }

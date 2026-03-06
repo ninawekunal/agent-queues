@@ -25,6 +25,7 @@ interface QueueStreamPanelProps {
   queueIds: string[];
   streamEvents: StreamEvent[];
   onProcessQueueItem: (refundId: string) => void;
+  blinkingQueueIds?: string[];
 }
 
 function getRequestNumber(refundId: string): string {
@@ -36,6 +37,7 @@ export function QueueStreamPanel({
   queueIds,
   streamEvents,
   onProcessQueueItem,
+  blinkingQueueIds = [],
 }: QueueStreamPanelProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -72,9 +74,15 @@ export function QueueStreamPanel({
                 <Chip
                   label={getRequestNumber(refundId)}
                   clickable
-                  color="info"
+                  color={blinkingQueueIds.includes(refundId) ? "warning" : "info"}
                   onClick={() => onProcessQueueItem(refundId)}
                   sx={{
+                    animation: blinkingQueueIds.includes(refundId)
+                      ? "queueBlink 450ms ease-in-out 2"
+                      : "none",
+                    border: blinkingQueueIds.includes(refundId)
+                      ? "1px solid rgba(245, 124, 0, 0.55)"
+                      : undefined,
                     transition: "all 150ms ease",
                     "&:hover": {
                       backgroundColor: "rgba(25, 118, 210, 0.2)",
@@ -92,13 +100,25 @@ export function QueueStreamPanel({
                   <Tooltip title={`refund_id: ${refundId}`}>
                     <StepButton
                       color="inherit"
-                      onClick={() => onProcessQueueItem(refundId)}
-                      sx={{
-                        borderRadius: 1.25,
-                        transition: "all 150ms ease",
-                        "&:hover": {
-                          backgroundColor: "rgba(25, 118, 210, 0.12)",
-                          color: "primary.main",
+                    onClick={() => onProcessQueueItem(refundId)}
+                    sx={{
+                      animation: blinkingQueueIds.includes(refundId)
+                        ? "queueBlink 450ms ease-in-out 2"
+                        : "none",
+                      backgroundColor: blinkingQueueIds.includes(refundId)
+                        ? "rgba(255, 167, 38, 0.25)"
+                        : undefined,
+                      color: blinkingQueueIds.includes(refundId)
+                        ? "warning.dark"
+                        : undefined,
+                      border: blinkingQueueIds.includes(refundId)
+                        ? "1px solid rgba(245, 124, 0, 0.55)"
+                        : undefined,
+                      borderRadius: 1.25,
+                      transition: "all 150ms ease",
+                      "&:hover": {
+                        backgroundColor: "rgba(25, 118, 210, 0.12)",
+                        color: "primary.main",
                         },
                       }}
                     >
