@@ -1,12 +1,9 @@
 import packageJson from "../../../../package.json";
 import { jsonError, jsonOk } from "@/shared/http/apiResponse";
-
-interface VersionResponseData {
-  name: string;
-  version: string;
-  node: string;
-  timestamp: string;
-}
+import {
+  versionResponseSchema,
+  type VersionResponse,
+} from "@/shared/contracts/version";
 
 export const dynamic = "force-dynamic";
 
@@ -22,12 +19,14 @@ export async function GET(): Promise<Response> {
     );
   }
 
-  const payload: VersionResponseData = {
+  const payload: VersionResponse = {
     name,
     version,
     node: process.version,
     timestamp: new Date().toISOString(),
   };
+
+  versionResponseSchema.parse(payload);
 
   return jsonOk(payload);
 }

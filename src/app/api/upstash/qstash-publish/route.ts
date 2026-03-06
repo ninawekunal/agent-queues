@@ -1,4 +1,5 @@
 import { jsonError, jsonOk } from "@/shared/http/apiResponse";
+import { parseJsonWithSchema } from "@/shared/http/contractValidation";
 import {
   qstashPublishInputSchema,
   qstashPublishOutputSchema,
@@ -25,20 +26,12 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
-  let rawBody: unknown = null;
-  try {
-    rawBody = await request.json();
-  } catch {
-    return jsonError(400, "INVALID_JSON_BODY", "Request body must be valid JSON.");
-  }
-
-  const parseResult = qstashPublishInputSchema.safeParse(rawBody);
-  if (!parseResult.success) {
-    return jsonError(
-      400,
-      "INVALID_QSTASH_PUBLISH_INPUT",
-      parseResult.error.issues.map((issue) => issue.message).join(" "),
-    );
+  const parseResult = await parseJsonWithSchema(request, qstashPublishInputSchema, {
+    invalidJsonCode: "INVALID_JSON_BODY",
+    invalidSchemaCode: "INVALID_QSTASH_PUBLISH_INPUT",
+  });
+  if (!parseResult.ok) {
+    return jsonError(400, parseResult.errorCode, parseResult.errorMessage);
   }
 
   const input = parseResult.data;

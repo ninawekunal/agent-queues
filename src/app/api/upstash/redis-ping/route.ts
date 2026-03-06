@@ -1,11 +1,9 @@
 import { jsonError, jsonOk } from "@/shared/http/apiResponse";
 import { hasRedisConfig, redisClient } from "@/server/upstash/upstashClients";
-
-interface RedisPingResponse {
-  key: string;
-  writtenAt: string;
-  readBack: string | null;
-}
+import {
+  redisPingResponseSchema,
+  type RedisPingResponse,
+} from "@/shared/contracts/upstash";
 
 export const dynamic = "force-dynamic";
 
@@ -30,6 +28,8 @@ export async function GET(): Promise<Response> {
       writtenAt,
       readBack,
     };
+
+    redisPingResponseSchema.parse(payload);
 
     return jsonOk(payload);
   } catch (error) {

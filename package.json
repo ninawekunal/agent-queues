@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "NODE_ENV=development node server.js",
+    "prebuild": "node scripts/verify-upstash.mjs --mode=build",
     "build": "next build",
     "start": "NODE_ENV=production node server.js",
     "lint": "next lint"

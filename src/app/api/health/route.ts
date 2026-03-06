@@ -1,19 +1,19 @@
 import { jsonOk } from "@/shared/http/apiResponse";
-
-interface HealthResponseData {
-  service: string;
-  environment: string;
-  timestamp: string;
-}
+import {
+  healthResponseSchema,
+  type HealthResponse,
+} from "@/shared/contracts/health";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(): Promise<Response> {
-  const payload: HealthResponseData = {
+  const payload: HealthResponse = {
     service: "agent-queues",
     environment: process.env.NODE_ENV ?? "development",
     timestamp: new Date().toISOString(),
   };
+
+  healthResponseSchema.parse(payload);
 
   return jsonOk(payload);
 }

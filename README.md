@@ -13,6 +13,10 @@ This repo is being built step-by-step.
    - `GET /api/upstash/redis-ping`
    - `POST /api/upstash/qstash-publish`
    - `POST /api/upstash/qstash-receiver`
+5. Refund seed route:
+   - `POST /api/refunds/seed`
+6. Startup/build guard:
+   - Upstash Redis + QStash connectivity is validated at server start and before build.
 
 ## Run
 
@@ -36,6 +40,17 @@ Open: [http://localhost:3000](http://localhost:3000)
 ```json
 { "ok": false, "error": { "code": "...", "message": "..." } }
 ```
+
+## API Contract Rule (For All New Endpoints)
+
+Every API route must include:
+
+1. `zod` input schema (`safeParse` before business logic)
+2. `zod` output schema (`parse` before `jsonOk`)
+3. Shared envelope via `jsonOk` / `jsonError`
+4. Shared parser helper: `src/shared/http/contractValidation.ts`
+
+Current contract files are in `src/shared/contracts/*`.
 
 ## Upstash Setup
 
@@ -72,6 +87,23 @@ For end-to-end callback testing, set `QSTASH_DESTINATION_URL` to a public URL po
 
 - `https://<your-domain>/api/upstash/qstash-receiver`
 
+### Refund seed API
+
+```bash
+curl -s -X POST http://localhost:3000/api/refunds/seed \
+  -H 'Content-Type: application/json' \
+  -d '{"agentId":"agent-1","count":10}' | jq
+```
+
+This writes pending refund cards to Redis key:
+
+- `refunds:agent:<agentId>:pending`
+
+### Build/start verification
+
+- `npm run build` runs `scripts/verify-upstash.mjs` first and fails fast if Redis/QStash is not reachable.
+- `npm run dev` and `npm start` also verify connections before the server listens.
+
 ## Key Files
 
 - `server.js`
@@ -80,6 +112,8 @@ For end-to-end callback testing, set `QSTASH_DESTINATION_URL` to a public URL po
 - `src/app/api/health/route.ts`
 - `src/app/api/version/route.ts`
 - `src/server/upstash/upstashClients.ts`
+- `scripts/verify-upstash.mjs`
 - `src/app/api/upstash/redis-ping/route.ts`
 - `src/app/api/upstash/qstash-publish/route.ts`
 - `src/app/api/upstash/qstash-receiver/route.ts`
+- `src/app/api/refunds/seed/route.ts`
