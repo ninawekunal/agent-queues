@@ -1,15 +1,14 @@
 import { jsonError, jsonOk } from "@/shared/http/apiResponse";
 import {
+  qstashPublishInputSchema,
+  qstashPublishOutputSchema,
+  type QStashPublishOutput,
+} from "@/shared/contracts/qstash";
+import {
   hasQStashConfig,
   qstashClient,
   qstashDestinationUrl,
 } from "@/server/upstash/upstashClients";
-
-interface QStashPublishResponse {
-  queued: true;
-  destinationUrl: string;
-  result: unknown;
-}
 
 export const dynamic = "force-dynamic";
 
@@ -26,12 +25,23 @@ export async function POST(request: Request): Promise<Response> {
     );
   }
 
-  let userPayload: unknown = null;
+  let rawBody: unknown = null;
   try {
-    userPayload = await request.json();
+    rawBody = await request.json();
   } catch {
-    userPayload = null;
+    return jsonError(400, "INVALID_JSON_BODY", "Request body must be valid JSON.");
   }
+
+  const parseResult = qstashPublishInputSchema.safeParse(rawBody);
+  if (!parseResult.success) {
+    return jsonError(
+      400,
+      "INVALID_QSTASH_PUBLISH_INPUT",
+      parseResult.error.issues.map((issue) => issue.message).join(" "),
+    );
+  }
+
+  const input = parseResult.data;
 
   try {
     const result = await qstashClient.publishJSON({
@@ -39,15 +49,30 @@ export async function POST(request: Request): Promise<Response> {
       body: {
         source: "api/upstash/qstash-publish",
         timestamp: new Date().toISOString(),
-        payload: userPayload,
+        payload: input,
       },
     });
 
-    const payload: QStashPublishResponse = {
+    const messageId =
+      result && typeof result === "object" && "messageId" in result
+        ? (result.messageId as string)
+        : null;
+
+    if (!messageId) {
+      return jsonError(
+        500,
+        "QSTASH_PUBLISH_INVALID_RESPONSE",
+        "QStash publish did not return a messageId.",
+      );
+    }
+
+    const payload: QStashPublishOutput = {
       queued: true,
       destinationUrl: qstashDestinationUrl,
-      result,
+      messageId,
     };
+
+    qstashPublishOutputSchema.parse(payload);
 
     return jsonOk(payload);
   } catch (error) {

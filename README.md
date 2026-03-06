@@ -63,7 +63,7 @@ Expected: write + read of key `upstash:redis-ping`.
 ```bash
 curl -s -X POST http://localhost:3000/api/upstash/qstash-publish \
   -H 'Content-Type: application/json' \
-  -d '{"hello":"world"}' | jq
+  -d '{"agentId":"agent-1","refundRequestId":"rr_1001","amount":129.99,"currency":"USD"}' | jq
 ```
 
 Expected: message queued successfully.
